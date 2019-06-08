@@ -59,6 +59,9 @@ import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
+import com.tylerthrailkill.helpers.prettyprint.PrettyPrintKt;
+
+import semanticdb.Reader;
 
 /** Main entry point for the turbine CLI. */
 public class Main {
@@ -73,6 +76,16 @@ public class Main {
   static final Attributes.Name INJECTING_RULE_KIND = new Attributes.Name("Injecting-Rule-Kind");
 
   public static void main(String[] args) throws IOException {
+    Reader r = new Reader();
+
+    Reader.Index index = r.load("/Users/winw/workspace/rsc/sandbox/META-INF/semanticdb/C.scala.semanticdb");
+    System.out.println(index);
+    System.out.println(index.infos);
+    System.out.println("");
+    System.out.println(index.anchors);
+    if (true) {
+      return;
+    }
     boolean ok;
     try {
       ok = compile(args);

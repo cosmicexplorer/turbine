@@ -419,7 +419,7 @@ public class ConstExpressionParser {
     return new Tree.Unary(position, expr, op);
   }
 
-  private Tree.@Nullable Expression qualIdent() {
+  private @Nullable Expression qualIdent() {
     int pos = position;
     ImmutableList.Builder<Ident> bits = ImmutableList.builder();
     bits.add(ident());

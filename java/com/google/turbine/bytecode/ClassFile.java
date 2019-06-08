@@ -131,7 +131,7 @@ public class ClassFile {
     private final String name;
     private final String descriptor;
     @Nullable private final String signature;
-    private final Const.@Nullable Value value;
+    private final @Nullable Value value;
     private final List<AnnotationInfo> annotations;
     private final ImmutableList<TypeAnnotationInfo> typeAnnotations;
 
@@ -174,7 +174,7 @@ public class ClassFile {
     }
 
     /** The compile-time constant value. */
-    public Const.@Nullable Value value() {
+    public @Nullable Value value() {
       return value;
     }
 
@@ -233,7 +233,7 @@ public class ClassFile {
     private final String descriptor;
     @Nullable private final String signature;
     private final List<String> exceptions;
-    private final AnnotationInfo.@Nullable ElementValue defaultValue;
+    private final @Nullable ElementValue defaultValue;
     private final List<AnnotationInfo> annotations;
     private final ImmutableList<ImmutableList<AnnotationInfo>> parameterAnnotations;
     private final ImmutableList<TypeAnnotationInfo> typeAnnotations;
@@ -289,7 +289,7 @@ public class ClassFile {
     }
 
     /** The value of the AnnotationDefault attribute. */
-    public AnnotationInfo.@Nullable ElementValue defaultValue() {
+    public @Nullable ElementValue defaultValue() {
       return defaultValue;
     }
 
