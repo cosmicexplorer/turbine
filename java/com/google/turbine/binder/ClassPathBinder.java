@@ -20,6 +20,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableMap;
+import com.google.turbine.binder.BytecodeBoundClassProvider;
 import com.google.turbine.binder.bound.ModuleInfo;
 import com.google.turbine.binder.bytecode.BytecodeBinder;
 import com.google.turbine.binder.bytecode.BytecodeBoundClass;
@@ -50,13 +51,13 @@ public class ClassPathBinder {
   public static ClassPath bindClasspath(Collection<Path> paths) throws IOException {
     // TODO(cushon): this is going to require an env eventually,
     // e.g. to look up type parameters in enclosing declarations
-    Map<ClassSymbol, BytecodeBoundClass> transitive = new LinkedHashMap<>();
-    Map<ClassSymbol, BytecodeBoundClass> map = new HashMap<>();
+    Map<ClassSymbol, BytecodeBoundClassProvider> transitive = new LinkedHashMap<>();
+    Map<ClassSymbol, BytecodeBoundClassProvider> map = new HashMap<>();
     Map<ModuleSymbol, ModuleInfo> modules = new HashMap<>();
-    Env<ClassSymbol, BytecodeBoundClass> benv =
-        new Env<ClassSymbol, BytecodeBoundClass>() {
+    Env<ClassSymbol, BytecodeBoundClassProvider> benv =
+        new Env<ClassSymbol, BytecodeBoundClassProvider>() {
           @Override
-          public BytecodeBoundClass get(ClassSymbol sym) {
+          public BytecodeBoundClassProvider get(ClassSymbol sym) {
             return map.get(sym);
           }
         };
@@ -67,16 +68,16 @@ public class ClassPathBinder {
         throw new IOException("error reading " + path, e);
       }
     }
-    for (Map.Entry<ClassSymbol, BytecodeBoundClass> entry : transitive.entrySet()) {
+    for (Map.Entry<ClassSymbol, BytecodeBoundClassProvider> entry : transitive.entrySet()) {
       ClassSymbol symbol = entry.getKey();
       map.putIfAbsent(symbol, entry.getValue());
     }
-    SimpleEnv<ClassSymbol, BytecodeBoundClass> env = new SimpleEnv<>(ImmutableMap.copyOf(map));
+    SimpleEnv<ClassSymbol, BytecodeBoundClassProvider> env = new SimpleEnv<>(ImmutableMap.copyOf(map));
     SimpleEnv<ModuleSymbol, ModuleInfo> moduleEnv = new SimpleEnv<>(ImmutableMap.copyOf(modules));
     TopLevelIndex index = SimpleTopLevelIndex.of(env.asMap().keySet());
     return new ClassPath() {
       @Override
-      public Env<ClassSymbol, BytecodeBoundClass> env() {
+      public Env<ClassSymbol, BytecodeBoundClassProvider> env() {
         return env;
       }
 
@@ -94,10 +95,10 @@ public class ClassPathBinder {
 
   private static void bindJar(
       Path path,
-      Map<ClassSymbol, BytecodeBoundClass> env,
+      Map<ClassSymbol, BytecodeBoundClassProvider> env,
       Map<ModuleSymbol, ModuleInfo> modules,
-      Env<ClassSymbol, BytecodeBoundClass> benv,
-      Map<ClassSymbol, BytecodeBoundClass> transitive)
+      Env<ClassSymbol, BytecodeBoundClassProvider> benv,
+      Map<ClassSymbol, BytecodeBoundClassProvider> transitive)
       throws IOException {
     // TODO(cushon): don't leak file descriptors
     for (Zip.Entry ze : new Zip.ZipIterable(path)) {
@@ -111,9 +112,9 @@ public class ClassPathBinder {
                 name.substring(TRANSITIVE_PREFIX.length(), name.length() - ".class".length()));
         transitive.computeIfAbsent(
             sym,
-            new Function<ClassSymbol, BytecodeBoundClass>() {
+            new Function<ClassSymbol, BytecodeBoundClassProvider>() {
               @Override
-              public BytecodeBoundClass apply(ClassSymbol sym) {
+              public BytecodeBoundClassProvider apply(ClassSymbol sym) {
                 return new BytecodeBoundClass(sym, toByteArrayOrDie(ze), benv, path.toString());
               }
             });

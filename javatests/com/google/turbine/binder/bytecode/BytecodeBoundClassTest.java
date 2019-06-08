@@ -24,6 +24,7 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.ByteStreams;
+import com.google.turbine.binder.BytecodeBoundClassProvider;
 import com.google.turbine.binder.bound.TurbineClassValue;
 import com.google.turbine.binder.bound.TypeBoundClass;
 import com.google.turbine.binder.bound.TypeBoundClass.MethodInfo;
@@ -125,7 +126,7 @@ public class BytecodeBoundClassTest {
   }
 
   private BytecodeBoundClass getBytecodeBoundClass(
-      Env<ClassSymbol, BytecodeBoundClass> env, Class<?> clazz) {
+      Env<ClassSymbol, BytecodeBoundClassProvider> env, Class<?> clazz) {
     String name = clazz.getName().replace('.', '/');
     String path = "/" + name + ".class";
     return new BytecodeBoundClass(
@@ -136,7 +137,7 @@ public class BytecodeBoundClassTest {
   }
 
   private BytecodeBoundClass getBytecodeBoundClass(Class<?> clazz) {
-    Env<ClassSymbol, BytecodeBoundClass> env = TURBINE_BOOTCLASSPATH.env();
+    Env<ClassSymbol, BytecodeBoundClassProvider> env = TURBINE_BOOTCLASSPATH.env();
     env =
         CompoundEnv.of(env)
             .append(

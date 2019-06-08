@@ -19,6 +19,7 @@ package com.google.turbine.deps;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.ImmutableMap;
+import com.google.turbine.binder.BytecodeBoundClassProvider;
 import com.google.turbine.binder.Binder.BindingResult;
 import com.google.turbine.binder.ClassPath;
 import com.google.turbine.binder.bound.TypeBoundClass;
@@ -46,7 +47,7 @@ public class Transitive {
       ClassPath bootClassPath, BindingResult bound) {
     ImmutableMap.Builder<String, byte[]> transitive = ImmutableMap.builder();
     for (ClassSymbol sym : superClosure(bound)) {
-      BytecodeBoundClass info = bound.classPathEnv().get(sym);
+      BytecodeBoundClassProvider info = bound.classPathEnv().get(sym);
       if (info == null) {
         // the symbol wasn't loaded from the classpath
         continue;

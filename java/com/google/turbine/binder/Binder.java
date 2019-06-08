@@ -85,7 +85,7 @@ public class Binder {
             bootclasspath.index(),
             classpath.index());
 
-    CompoundEnv<ClassSymbol, BytecodeBoundClass> classPathEnv =
+    CompoundEnv<ClassSymbol, BytecodeBoundClassProvider> classPathEnv =
         CompoundEnv.of(classpath.env()).append(bootclasspath.env());
 
     CompoundEnv<ModuleSymbol, ModuleInfo> classPathModuleEnv =
@@ -168,7 +168,7 @@ public class Binder {
       Env<ClassSymbol, SourceBoundClass> ienv,
       TopLevelIndex tli,
       ImmutableList<PreprocessedCompUnit> units,
-      CompoundEnv<ClassSymbol, BytecodeBoundClass> classPathEnv) {
+      CompoundEnv<ClassSymbol, BytecodeBoundClassProvider> classPathEnv) {
 
     SimpleEnv.Builder<ClassSymbol, PackageSourceBoundClass> env = SimpleEnv.builder();
     SimpleEnv.Builder<ModuleSymbol, PackageSourceBoundModule> modules = SimpleEnv.builder();
@@ -215,7 +215,7 @@ public class Binder {
       TurbineLog log,
       Iterable<ClassSymbol> syms,
       final SimpleEnv<ClassSymbol, PackageSourceBoundClass> psenv,
-      CompoundEnv<ClassSymbol, BytecodeBoundClass> classPathEnv) {
+      CompoundEnv<ClassSymbol, BytecodeBoundClassProvider> classPathEnv) {
     ImmutableMap.Builder<
             ClassSymbol, LazyEnv.Completer<ClassSymbol, HeaderBoundClass, SourceHeaderBoundClass>>
         completers = ImmutableMap.builder();
@@ -391,12 +391,12 @@ public class Binder {
   public static class BindingResult {
     private final ImmutableMap<ClassSymbol, SourceTypeBoundClass> units;
     private final ImmutableList<SourceModuleInfo> modules;
-    private final CompoundEnv<ClassSymbol, BytecodeBoundClass> classPathEnv;
+    private final CompoundEnv<ClassSymbol, BytecodeBoundClassProvider> classPathEnv;
 
     public BindingResult(
         ImmutableMap<ClassSymbol, SourceTypeBoundClass> units,
         ImmutableList<SourceModuleInfo> modules,
-        CompoundEnv<ClassSymbol, BytecodeBoundClass> classPathEnv) {
+        CompoundEnv<ClassSymbol, BytecodeBoundClassProvider> classPathEnv) {
       this.units = units;
       this.modules = modules;
       this.classPathEnv = classPathEnv;
@@ -412,7 +412,7 @@ public class Binder {
     }
 
     /** The classpath. */
-    public CompoundEnv<ClassSymbol, BytecodeBoundClass> classPathEnv() {
+    public CompoundEnv<ClassSymbol, BytecodeBoundClassProvider> classPathEnv() {
       return classPathEnv;
     }
   }

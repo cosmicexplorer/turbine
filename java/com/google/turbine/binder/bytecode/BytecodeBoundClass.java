@@ -24,6 +24,7 @@ import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.turbine.binder.BytecodeBoundClassProvider;
 import com.google.turbine.binder.bound.AnnotationMetadata;
 import com.google.turbine.binder.bound.BoundClass;
 import com.google.turbine.binder.bound.HeaderBoundClass;
@@ -68,17 +69,17 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * resolved and canonicalized so there are no cycles. The laziness also minimizes the amount of work
  * done on the classpath.
  */
-public class BytecodeBoundClass implements BoundClass, HeaderBoundClass, TypeBoundClass {
+public class BytecodeBoundClass implements BytecodeBoundClassProvider {
 
   private final ClassSymbol sym;
-  private final Env<ClassSymbol, BytecodeBoundClass> env;
+  private final Env<ClassSymbol, BytecodeBoundClassProvider> env;
   private final Supplier<ClassFile> classFile;
   private final String jarFile;
 
   public BytecodeBoundClass(
       ClassSymbol sym,
       Supplier<byte[]> bytes,
-      Env<ClassSymbol, BytecodeBoundClass> env,
+      Env<ClassSymbol, BytecodeBoundClassProvider> env,
       String jarFile) {
     this.sym = sym;
     this.env = env;
@@ -563,7 +564,7 @@ public class BytecodeBoundClass implements BoundClass, HeaderBoundClass, TypeBou
    * instances.
    */
   private static Function<String, TyVarSymbol> makeScope(
-      final Env<ClassSymbol, BytecodeBoundClass> env,
+      final Env<ClassSymbol, BytecodeBoundClassProvider> env,
       final ClassSymbol sym,
       final Map<String, TyVarSymbol> typeVariables) {
     return new Function<String, TyVarSymbol>() {
@@ -575,7 +576,7 @@ public class BytecodeBoundClass implements BoundClass, HeaderBoundClass, TypeBou
         }
         ClassSymbol curr = sym;
         while (curr != null) {
-          BytecodeBoundClass info = env.get(curr);
+          BytecodeBoundClassProvider info = env.get(curr);
           if (info == null) {
             throw new AssertionError(curr);
           }
@@ -590,12 +591,12 @@ public class BytecodeBoundClass implements BoundClass, HeaderBoundClass, TypeBou
     };
   }
 
-  /** The jar file the symbol was loaded from. */
+  @Override
   public String jarFile() {
     return jarFile;
   }
 
-  /** The class file the symbol was loaded from. */
+  @Override
   public ClassFile classFile() {
     return classFile.get();
   }

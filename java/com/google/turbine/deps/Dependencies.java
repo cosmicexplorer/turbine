@@ -20,6 +20,7 @@ import com.google.common.base.Predicates;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.turbine.binder.BytecodeBoundClassProvider;
 import com.google.turbine.binder.Binder.BindingResult;
 import com.google.turbine.binder.ClassPath;
 import com.google.turbine.binder.bound.TypeBoundClass;
@@ -52,7 +53,7 @@ public class Dependencies {
     addPackageInfos(closure, bound);
     Set<String> jars = new LinkedHashSet<>();
     for (ClassSymbol sym : closure) {
-      BytecodeBoundClass info = bound.classPathEnv().get(sym);
+      BytecodeBoundClassProvider info = bound.classPathEnv().get(sym);
       if (info == null) {
         // the symbol wasn't loaded from the classpath
         continue;

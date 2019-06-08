@@ -27,6 +27,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Table;
+import com.google.turbine.binder.BytecodeBoundClassProvider;
 import com.google.turbine.binder.bound.ModuleInfo;
 import com.google.turbine.binder.bytecode.BytecodeBinder;
 import com.google.turbine.binder.bytecode.BytecodeBoundClass;
@@ -96,7 +97,7 @@ public class JimageClassBinder {
   private final Table<String, String, ClassSymbol> packageClassesBySimpleName =
       HashBasedTable.create();
   private final Map<String, ModuleInfo> moduleMap = new HashMap<>();
-  private final Map<ClassSymbol, BytecodeBoundClass> env = new HashMap<>();
+  private final Map<ClassSymbol, BytecodeBoundClassProvider> env = new HashMap<>();
 
   public JimageClassBinder(ImmutableMultimap<String, String> packageMap, Path modules) {
     this.packageMap = packageMap;
@@ -130,10 +131,10 @@ public class JimageClassBinder {
     if (!loadedPackages.add(packageName)) {
       return true;
     }
-    Env<ClassSymbol, BytecodeBoundClass> env =
-        new Env<ClassSymbol, BytecodeBoundClass>() {
+    Env<ClassSymbol, BytecodeBoundClassProvider> env =
+        new Env<ClassSymbol, BytecodeBoundClassProvider>() {
           @Override
-          public BytecodeBoundClass get(ClassSymbol sym) {
+          public BytecodeBoundClassProvider get(ClassSymbol sym) {
             return JimageClassBinder.this.env.get(sym);
           }
         };
@@ -233,10 +234,10 @@ public class JimageClassBinder {
     final TopLevelIndex index = new JimageTopLevelIndex();
 
     @Override
-    public Env<ClassSymbol, BytecodeBoundClass> env() {
-      return new Env<ClassSymbol, BytecodeBoundClass>() {
+    public Env<ClassSymbol, BytecodeBoundClassProvider> env() {
+      return new Env<ClassSymbol, BytecodeBoundClassProvider>() {
         @Override
-        public BytecodeBoundClass get(ClassSymbol sym) {
+        public BytecodeBoundClassProvider get(ClassSymbol sym) {
           return initPackage(sym.packageName()) ? env.get(sym) : null;
         }
       };

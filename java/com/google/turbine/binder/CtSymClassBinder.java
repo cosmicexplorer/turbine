@@ -21,6 +21,7 @@ import static com.google.common.base.StandardSystemProperty.JAVA_HOME;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableMap;
+import com.google.turbine.binder.BytecodeBoundClassProvider;
 import com.google.turbine.binder.bound.ModuleInfo;
 import com.google.turbine.binder.bytecode.BytecodeBinder;
 import com.google.turbine.binder.bytecode.BytecodeBoundClass;
@@ -49,12 +50,12 @@ public class CtSymClassBinder {
     if (!Files.exists(ctSym)) {
       throw new IllegalStateException("lib/ct.sym does not exist in " + javaHome);
     }
-    Map<ClassSymbol, BytecodeBoundClass> map = new HashMap<>();
+    Map<ClassSymbol, BytecodeBoundClassProvider> map = new HashMap<>();
     Map<ModuleSymbol, ModuleInfo> modules = new HashMap<>();
-    Env<ClassSymbol, BytecodeBoundClass> benv =
-        new Env<ClassSymbol, BytecodeBoundClass>() {
+    Env<ClassSymbol, BytecodeBoundClassProvider> benv =
+        new Env<ClassSymbol, BytecodeBoundClassProvider>() {
           @Override
-          public BytecodeBoundClass get(ClassSymbol sym) {
+          public BytecodeBoundClassProvider get(ClassSymbol sym) {
             return map.get(sym);
           }
         };
@@ -87,12 +88,12 @@ public class CtSymClassBinder {
       // we didn't find any classes for the desired release
       return null;
     }
-    SimpleEnv<ClassSymbol, BytecodeBoundClass> env = new SimpleEnv<>(ImmutableMap.copyOf(map));
+    SimpleEnv<ClassSymbol, BytecodeBoundClassProvider> env = new SimpleEnv<>(ImmutableMap.copyOf(map));
     Env<ModuleSymbol, ModuleInfo> moduleEnv = new SimpleEnv<>(ImmutableMap.copyOf(modules));
     TopLevelIndex index = SimpleTopLevelIndex.of(env.asMap().keySet());
     return new ClassPath() {
       @Override
-      public Env<ClassSymbol, BytecodeBoundClass> env() {
+      public Env<ClassSymbol, BytecodeBoundClassProvider> env() {
         return env;
       }
 

@@ -29,7 +29,9 @@ import com.google.turbine.binder.sym.ModuleSymbol;
  */
 public interface ClassPath {
   /** The classpath's environment. */
-  Env<ClassSymbol, BytecodeBoundClass> env();
+  // TODO: convert BytecodeBoundClass to an interface here which can be implemented by something rsc
+  // can build!
+  Env<ClassSymbol, BytecodeBoundClassProvider> env();
 
   /** The classpath's module environment. */
   Env<ModuleSymbol, ModuleInfo> moduleEnv();

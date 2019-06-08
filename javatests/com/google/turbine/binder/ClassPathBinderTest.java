@@ -72,7 +72,7 @@ public class ClassPathBinderTest {
 
   @Test
   public void classPathClasses() throws IOException {
-    Env<ClassSymbol, BytecodeBoundClass> env = TURBINE_BOOTCLASSPATH.env();
+    Env<ClassSymbol, BytecodeBoundClassProvider> env = TURBINE_BOOTCLASSPATH.env();
 
     TypeBoundClass c = env.get(new ClassSymbol("java/util/Map$Entry"));
     assertThat(c.owner()).isEqualTo(new ClassSymbol("java/util/Map"));
@@ -93,7 +93,7 @@ public class ClassPathBinderTest {
 
   @Test
   public void interfaces() {
-    Env<ClassSymbol, BytecodeBoundClass> env = TURBINE_BOOTCLASSPATH.env();
+    Env<ClassSymbol, BytecodeBoundClassProvider> env = TURBINE_BOOTCLASSPATH.env();
 
     TypeBoundClass c = env.get(new ClassSymbol("java/lang/annotation/Retention"));
     assertThat(c.interfaceTypes()).hasSize(1);
@@ -111,7 +111,7 @@ public class ClassPathBinderTest {
 
   @Test
   public void annotations() {
-    Env<ClassSymbol, BytecodeBoundClass> env = TURBINE_BOOTCLASSPATH.env();
+    Env<ClassSymbol, BytecodeBoundClassProvider> env = TURBINE_BOOTCLASSPATH.env();
     TypeBoundClass c = env.get(new ClassSymbol("java/lang/annotation/Retention"));
 
     AnnoInfo anno =

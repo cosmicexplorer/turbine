@@ -21,6 +21,7 @@ import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.collect.ImmutableList;
+import com.google.turbine.binder.BytecodeBoundClassProvider;
 import com.google.turbine.binder.bytecode.BytecodeBoundClass;
 import com.google.turbine.binder.lookup.LookupKey;
 import com.google.turbine.binder.lookup.LookupResult;
@@ -41,7 +42,7 @@ public class JimageClassBinderTest {
     }
     ClassPath binder = JimageClassBinder.bindDefault();
 
-    BytecodeBoundClass objectInfo = binder.env().get(new ClassSymbol("java/lang/Object"));
+    BytecodeBoundClassProvider objectInfo = binder.env().get(new ClassSymbol("java/lang/Object"));
     assertThat(objectInfo).isNotNull();
     assertThat(objectInfo.jarFile()).isEqualTo("/modules/java.base/java/lang/Object.class");
     assertThat(binder.env().get(new ClassSymbol("java/lang/NoSuch"))).isNull();
