@@ -43,14 +43,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import scala.meta.internal.semanticdb.*;
 
 public class RscBoundClass implements BytecodeBoundClassProvider {
 
-  // public RscBoundClass(
-
-  // ) {
-
-  // }
+  public RscBoundClass(SymbolInformation info) {}
 
   @Override
   public TurbineTyKind kind() {

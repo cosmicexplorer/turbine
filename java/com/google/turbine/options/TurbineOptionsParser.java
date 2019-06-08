@@ -108,6 +108,9 @@ public class TurbineOptionsParser {
         case "--target_label":
           builder.setTargetLabel(readOne(argumentDeque));
           break;
+        case "--semanticdbs":
+          builder.addSemanticDbs(readList(argumentDeque));
+          break;
         case "--injecting_rule_kind":
           builder.setInjectingRuleKind(readOne(argumentDeque));
           break;

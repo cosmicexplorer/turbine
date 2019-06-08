@@ -37,6 +37,7 @@ public class TurbineOptions {
   private final ImmutableList<String> sourceJars;
   private final Optional<String> outputDeps;
   private final ImmutableSet<String> directJars;
+  private final ImmutableSet<String> semanticDbs;
   private final Optional<String> targetLabel;
   private final Optional<String> injectingRuleKind;
   private final ImmutableList<String> depsArtifacts;
@@ -57,6 +58,7 @@ public class TurbineOptions {
       ImmutableList<String> sourceJars,
       @Nullable String outputDeps,
       ImmutableSet<String> directJars,
+      ImmutableSet<String> semanticDbs,
       @Nullable String targetLabel,
       @Nullable String injectingRuleKind,
       ImmutableList<String> depsArtifacts,
@@ -75,6 +77,7 @@ public class TurbineOptions {
     this.sourceJars = checkNotNull(sourceJars, "sourceJars must not be null");
     this.outputDeps = Optional.ofNullable(outputDeps);
     this.directJars = checkNotNull(directJars, "directJars must not be null");
+    this.semanticDbs = checkNotNull(semanticDbs, "semanticDbs must not be null");
     this.targetLabel = Optional.ofNullable(targetLabel);
     this.injectingRuleKind = Optional.ofNullable(injectingRuleKind);
     this.depsArtifacts = checkNotNull(depsArtifacts, "depsArtifacts must not be null");
@@ -92,6 +95,11 @@ public class TurbineOptions {
   /** Paths to classpath artifacts. */
   public ImmutableList<String> classPath() {
     return classPath;
+  }
+
+  /** Paths to semanticdb files. */
+  public ImmutableSet<String> semanticDbs() {
+    return semanticDbs;
   }
 
   /** Paths to compilation bootclasspath artifacts. */
@@ -208,6 +216,7 @@ public class TurbineOptions {
     @Nullable private String system;
     private String outputDeps;
     private final ImmutableSet.Builder<String> directJars = ImmutableSet.builder();
+    private final ImmutableSet.Builder<String> semanticDbs = ImmutableSet.builder();
     @Nullable private String targetLabel;
     @Nullable private String injectingRuleKind;
     private final ImmutableList.Builder<String> depsArtifacts = ImmutableList.builder();
@@ -229,6 +238,7 @@ public class TurbineOptions {
           sourceJars.build(),
           outputDeps,
           directJars.build(),
+          semanticDbs.build(),
           targetLabel,
           injectingRuleKind,
           depsArtifacts.build(),
@@ -330,6 +340,11 @@ public class TurbineOptions {
 
     public Builder addDirectJars(ImmutableList<String> jars) {
       this.directJars.addAll(jars);
+      return this;
+    }
+
+    public Builder addSemanticDbs(ImmutableList<String> semanticDbs) {
+      this.semanticDbs.addAll(semanticDbs);
       return this;
     }
   }

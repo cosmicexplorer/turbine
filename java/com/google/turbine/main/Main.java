@@ -28,6 +28,8 @@ import com.google.turbine.binder.ClassPath;
 import com.google.turbine.binder.ClassPathBinder;
 import com.google.turbine.binder.CtSymClassBinder;
 import com.google.turbine.binder.JimageClassBinder;
+import com.google.turbine.binder.MutableClassPath;
+import com.google.turbine.binder.RscClassPathBinder;
 import com.google.turbine.deps.Dependencies;
 import com.google.turbine.deps.Transitive;
 import com.google.turbine.diag.SourceFile;
@@ -76,16 +78,6 @@ public class Main {
   static final Attributes.Name INJECTING_RULE_KIND = new Attributes.Name("Injecting-Rule-Kind");
 
   public static void main(String[] args) throws IOException {
-    Reader r = new Reader();
-
-    Reader.Index index = r.load("/Users/winw/workspace/rsc/sandbox/META-INF/semanticdb/C.scala.semanticdb");
-    System.out.println(index);
-    System.out.println(index.infos);
-    System.out.println("");
-    System.out.println(index.anchors);
-    if (true) {
-      return;
-    }
     boolean ok;
     try {
       ok = compile(args);
@@ -114,7 +106,13 @@ public class Main {
     Collection<String> reducedClasspath =
         Dependencies.reduceClasspath(
             options.classPath(), options.directJars(), options.depsArtifacts());
-    ClassPath classpath = ClassPathBinder.bindClasspath(toPaths(reducedClasspath));
+    MutableClassPath nonSemanticDbClassPath = ClassPathBinder.bindClasspathMutable(toPaths(reducedClasspath));
+
+    // TODO: convert semanticdbs into part of the output header jar!!
+    Collection<String> semanticDbs = options.semanticDbs();
+    MutableClassPath withSemanticDbClassPath = RscClassPathBinder.bindClasspathFromExistingAndRscOutput(nonSemanticDbClassPath, semanticDbs);
+
+    ClassPath classpath = withSemanticDbClassPath;
 
     BindingResult bound =
         Binder.bind(units, classpath, bootclasspath, /* moduleVersion=*/ Optional.empty());
