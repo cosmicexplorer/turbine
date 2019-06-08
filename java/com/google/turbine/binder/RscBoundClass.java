@@ -46,6 +46,12 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class RscBoundClass implements BytecodeBoundClassProvider {
 
+  // public RscBoundClass(
+
+  // ) {
+
+  // }
+
   @Override
   public TurbineTyKind kind() {
     return TurbineTyKind.CLASS;

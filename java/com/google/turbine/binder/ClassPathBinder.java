@@ -49,6 +49,10 @@ public class ClassPathBinder {
 
   /** Creates an environment containing symbols in the given classpath. */
   public static ClassPath bindClasspath(Collection<Path> paths) throws IOException {
+    return bindClasspathMutable(paths);
+  }
+
+  public static MutableClassPath bindClasspathMutable(Collection<Path> paths) throws IOException {
     // TODO(cushon): this is going to require an env eventually,
     // e.g. to look up type parameters in enclosing declarations
     Map<ClassSymbol, BytecodeBoundClassProvider> transitive = new LinkedHashMap<>();
@@ -72,25 +76,7 @@ public class ClassPathBinder {
       ClassSymbol symbol = entry.getKey();
       map.putIfAbsent(symbol, entry.getValue());
     }
-    SimpleEnv<ClassSymbol, BytecodeBoundClassProvider> env = new SimpleEnv<>(ImmutableMap.copyOf(map));
-    SimpleEnv<ModuleSymbol, ModuleInfo> moduleEnv = new SimpleEnv<>(ImmutableMap.copyOf(modules));
-    TopLevelIndex index = SimpleTopLevelIndex.of(env.asMap().keySet());
-    return new ClassPath() {
-      @Override
-      public Env<ClassSymbol, BytecodeBoundClassProvider> env() {
-        return env;
-      }
-
-      @Override
-      public Env<ModuleSymbol, ModuleInfo> moduleEnv() {
-        return moduleEnv;
-      }
-
-      @Override
-      public TopLevelIndex index() {
-        return index;
-      }
-    };
+    return new MutableClassPath(ImmutableMap.copyOf(map), ImmutableMap.copyOf(modules));
   }
 
   private static void bindJar(

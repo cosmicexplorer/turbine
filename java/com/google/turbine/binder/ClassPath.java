@@ -29,10 +29,10 @@ import com.google.turbine.binder.sym.ModuleSymbol;
  */
 public interface ClassPath {
   /** The classpath's environment. */
-  // TODO: convert BytecodeBoundClass to an interface here which can be implemented by something rsc
-  // can build!
   Env<ClassSymbol, BytecodeBoundClassProvider> env();
 
+  // NB: Modules are a java 9 feature -- IGNORE!!! See
+  // https://www.oracle.com/corporate/features/understanding-java-9-modules.html
   /** The classpath's module environment. */
   Env<ModuleSymbol, ModuleInfo> moduleEnv();
 
