@@ -38,6 +38,8 @@ import com.google.turbine.type.Type;
 import com.google.turbine.type.Type.ClassTy;
 import com.google.turbine.type.Type.IntersectionTy;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -57,7 +59,7 @@ public class RscBoundClass implements BytecodeBoundClassProvider {
 
   @Override
   public ImmutableMap<String, ClassSymbol> children() {
-    return new ImmutableMap<?, ?>();
+    return ImmutableMap.of();
   }
 
   @Override
@@ -67,7 +69,7 @@ public class RscBoundClass implements BytecodeBoundClassProvider {
 
   @Override
   public ImmutableMap<String, TyVarSymbol> typeParameters() {
-    return new ImmutableMap<?, ?>();
+    return ImmutableMap.of();
   }
 
   @Override
@@ -77,7 +79,7 @@ public class RscBoundClass implements BytecodeBoundClassProvider {
 
   @Override
   public ImmutableList<ClassSymbol> interfaces() {
-    return new ImmutableList<?>();
+    return ImmutableList.of();
   }
 
   @Override
@@ -87,32 +89,36 @@ public class RscBoundClass implements BytecodeBoundClassProvider {
 
   @Override
   public ImmutableList<Type> interfaceTypes() {
-    return new ImmutableList<?>();
+    return ImmutableList.of();
   }
 
   @Override
   public ImmutableMap<TyVarSymbol, TyVarInfo> typeParameterTypes() {
-    return new ImmutableMap<?, ?>();
+    return ImmutableMap.of();
   }
 
   @Override
   public ImmutableList<FieldInfo> fields() {
-    return new ImmutableList<?>();
+    return ImmutableList.of();
   }
 
   @Override
   public ImmutableList<MethodInfo> methods() {
-    return new ImmutableList<?>();
+    return ImmutableList.of();
   }
 
   @Override
   public AnnotationMetadata annotationMetadata() {
-    return AnnotationMetadata.DEFAULT_TARGETS;
+    return new AnnotationMetadata(
+      RetentionPolicy.RUNTIME,
+      ImmutableSet.of(),
+      ClassSymbol.OBJECT
+    );
   }
 
   @Override
   public ImmutableList<AnnoInfo> annotations() {
-    return new ImmutableList<?>();
+    return ImmutableList.of();
   }
 
   @Override
@@ -127,12 +133,12 @@ public class RscBoundClass implements BytecodeBoundClassProvider {
       "name",
       "signature",
       "superClass",
-      new List<?>(),
-      new List<?>(),
-      new List<?>(),
-      new List<?>(),
-      new List<?>(),
-      new ImmutableList<?>(),
+      Collections.emptyList(),
+      Collections.emptyList(),
+      Collections.emptyList(),
+      Collections.emptyList(),
+      Collections.emptyList(),
+      ImmutableList.of(),
       null);
   }
 
