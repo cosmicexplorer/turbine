@@ -43,6 +43,11 @@ public class RscBoundClass implements BytecodeBoundClassProvider {
     this.info = info;
   }
 
+  private String noEmpty(String s) {
+    if (s.startsWith("_empty_/")) return s.substring("_empty_/".length());
+    return s;
+  }
+
   @Override
   public TurbineTyKind kind() {
     SymbolInformation.Kind kind = info.kind();
@@ -56,7 +61,9 @@ public class RscBoundClass implements BytecodeBoundClassProvider {
   @Override
   public ClassSymbol owner() {
     String owner = new Scala.ScalaSymbolOps(info.symbol()).owner();
-    return new ClassSymbol(owner);
+    String noe = noEmpty(owner);
+    if (noe.isEmpty()) return null;
+    return new ClassSymbol(noe);
   }
 
   // TODO
@@ -99,7 +106,7 @@ public class RscBoundClass implements BytecodeBoundClassProvider {
       TypeRef parent = (TypeRef) t;
       SymbolInformation pinfo = index.infos.get(parent.symbol());
       if (pinfo.kind().isClass()) {
-        return new ClassSymbol(pinfo.symbol());
+        return new ClassSymbol(noEmpty(pinfo.symbol()));
       }
     }
 
@@ -118,7 +125,7 @@ public class RscBoundClass implements BytecodeBoundClassProvider {
       TypeRef parent = (TypeRef) t;
       SymbolInformation pinfo = index.infos.get(parent.symbol());
       if (pinfo.kind().isTrait() || pinfo.kind().isInterface()) {
-        res.add(new ClassSymbol(pinfo.symbol()));
+        res.add(new ClassSymbol(noEmpty(pinfo.symbol())));
       }
     }
 

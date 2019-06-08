@@ -43,9 +43,15 @@ public class RscClassPathBinder {
     for (String path : rscOutput) {
       Reader.Index index = semanticDbReader.load(path);
       for (Map.Entry<String, SymbolInformation> infoEntry : index.infos.entrySet()) {
-        ClassSymbol sym = new ClassSymbol(infoEntry.getKey());
-        RscBoundClass boundClass = new RscBoundClass(index, infoEntry.getValue());
-        envBuilder.put(sym, boundClass);
+        SymbolInformation.Kind kind = infoEntry.getValue().kind();
+        if (kind.isClass() || kind.isTrait() || kind.isObject() || kind.isInterface()) {
+          ClassSymbol sym = new ClassSymbol(infoEntry.getValue().displayName());
+          RscBoundClass boundClass = new RscBoundClass(index, infoEntry.getValue());
+          System.out.println(infoEntry.getKey());
+          System.out.println(infoEntry.getValue());
+          System.out.println("====");
+          envBuilder.put(sym, boundClass);
+        }
       }
     }
 

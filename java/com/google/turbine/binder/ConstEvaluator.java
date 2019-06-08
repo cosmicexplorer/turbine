@@ -203,9 +203,13 @@ public strictfp class ConstEvaluator {
     }
     LookupResult result = scope.lookup(new LookupKey(ImmutableList.copyOf(flat)));
     if (result == null) {
+      System.out.println("null for");
+      System.out.println(flat.getFirst().value());
       throw error(classTy.position(), ErrorKind.CANNOT_RESOLVE, flat.peekFirst());
     }
     if (result.sym().symKind() != Symbol.Kind.CLASS) {
+      System.out.println("not class for");
+      System.out.println(flat.getFirst().value());
       throw error(classTy.position(), ErrorKind.UNEXPECTED_TYPE_PARAMETER, flat.peekFirst());
     }
     ClassSymbol classSym = (ClassSymbol) result.sym();
