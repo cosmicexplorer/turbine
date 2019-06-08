@@ -38,6 +38,8 @@ class UsageException extends RuntimeException {
     "    The compilation classpath.",
     "  --bootclasspath",
     "    The compilation bootclasspath.",
+    "  --semanticdbs",
+    "    Any SemanticDB files to parse.",
     "  --help",
     "    Print this usage statement.",
     "  @<filename>",
