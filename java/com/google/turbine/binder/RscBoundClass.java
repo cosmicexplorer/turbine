@@ -1,75 +1,88 @@
 package com.google.turbine.binder;
 
-import com.google.common.base.Supplier;
-import com.google.common.base.Suppliers;
+import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
+import scala.collection.JavaConverters;
+import scala.meta.internal.semanticdb.Access;
+import scala.meta.internal.semanticdb.ClassSignature;
+import scala.meta.internal.semanticdb.PrivateAccess;
+import scala.meta.internal.semanticdb.ProtectedAccess;
+import scala.meta.internal.semanticdb.PublicAccess;
+import scala.meta.internal.semanticdb.Scala;
+import scala.meta.internal.semanticdb.SymbolInformation;
+import scala.meta.internal.semanticdb.TypeRef;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.turbine.binder.BytecodeBoundClassProvider;
 import com.google.turbine.binder.bound.AnnotationMetadata;
-import com.google.turbine.binder.bound.BoundClass;
-import com.google.turbine.binder.bound.HeaderBoundClass;
-import com.google.turbine.binder.bound.TypeBoundClass;
-import com.google.turbine.binder.env.Env;
 import com.google.turbine.binder.sym.ClassSymbol;
-import com.google.turbine.binder.sym.FieldSymbol;
-import com.google.turbine.binder.sym.MethodSymbol;
 import com.google.turbine.binder.sym.TyVarSymbol;
 import com.google.turbine.bytecode.ClassFile;
-import com.google.turbine.bytecode.ClassFile.AnnotationInfo;
-import com.google.turbine.bytecode.ClassFile.AnnotationInfo.ElementValue;
-import com.google.turbine.bytecode.ClassFile.AnnotationInfo.ElementValue.ArrayValue;
-import com.google.turbine.bytecode.ClassFile.AnnotationInfo.ElementValue.ConstTurbineClassValue;
-import com.google.turbine.bytecode.ClassFile.AnnotationInfo.ElementValue.EnumConstValue;
-import com.google.turbine.bytecode.ClassFile.AnnotationInfo.ElementValue.Kind;
-import com.google.turbine.bytecode.ClassFile.MethodInfo.ParameterInfo;
-import com.google.turbine.bytecode.ClassReader;
-import com.google.turbine.bytecode.sig.Sig;
-import com.google.turbine.bytecode.sig.Sig.ClassSig;
-import com.google.turbine.bytecode.sig.Sig.ClassTySig;
-import com.google.turbine.bytecode.sig.Sig.TySig;
-import com.google.turbine.bytecode.sig.SigParser;
-import com.google.turbine.model.Const;
-import com.google.turbine.model.TurbineElementType;
-import com.google.turbine.model.TurbineFlag;
 import com.google.turbine.model.TurbineTyKind;
 import com.google.turbine.type.AnnoInfo;
 import com.google.turbine.type.Type;
 import com.google.turbine.type.Type.ClassTy;
-import com.google.turbine.type.Type.IntersectionTy;
-import java.lang.annotation.RetentionPolicy;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
+
 import org.checkerframework.checker.nullness.qual.Nullable;
 import scala.meta.internal.semanticdb.*;
 
+import semanticdb.Reader;
+
 public class RscBoundClass implements BytecodeBoundClassProvider {
 
-  public RscBoundClass(SymbolInformation info) {}
+  private Reader.Index index;
+  private SymbolInformation info;
+
+  public RscBoundClass(Reader.Index index, SymbolInformation info) {
+    this.index = index;
+    this.info = info;
+  }
 
   @Override
   public TurbineTyKind kind() {
-    return TurbineTyKind.CLASS;
+    SymbolInformation.Kind kind = info.kind();
+    if (kind.isClass() || kind.isObject()) return TurbineTyKind.CLASS;
+    if (kind.isTrait() || kind.isInterface()) return TurbineTyKind.INTERFACE;
+    System.out.println("[error] Bad kind: " + info.kind().toString());
+    return null;
   }
 
   @Nullable
   @Override
   public ClassSymbol owner() {
-    return ClassSymbol.OBJECT;
+    String owner = new Scala.ScalaSymbolOps(info.symbol()).owner();
+    return new ClassSymbol(owner);
   }
 
+  // TODO
   @Override
   public ImmutableMap<String, ClassSymbol> children() {
     return ImmutableMap.of();
   }
 
+  // TODO https://docs.oracle.com/javase/specs/jvms/se7/html/jvms-4.html
   @Override
   public int access() {
-    return 1;
+    int acc = 0;
+    Access access = info.access();
+    int properties = info.properties();
+
+    if (access instanceof PublicAccess) acc |= 0x1;
+    if (access instanceof PrivateAccess) acc |= 0x2;
+    if (access instanceof ProtectedAccess) acc |= 0x4;
+//    if ((properties & SymbolInformation.Property.STATIC$.MODULE$.value()) > 0) acc |= 0x8;
+//    if ((properties & SymbolInformation.Property.FINAL$.MODULE$.value()) > 0) acc |= 0x10;
+    // TODO Volatile, Transient, Synthethic, Enum?
+
+    return acc;
   }
 
+  // TODO wat
   @Override
   public ImmutableMap<String, TyVarSymbol> typeParameters() {
     return ImmutableMap.of();
@@ -77,12 +90,39 @@ public class RscBoundClass implements BytecodeBoundClassProvider {
 
   @Override
   public ClassSymbol superclass() {
+    ClassSignature sig = ((ClassSignature) info.signature());
+
+    Collection<scala.meta.internal.semanticdb.Type> parents =
+        JavaConverters.asJavaCollection(sig.parents());
+
+    for (scala.meta.internal.semanticdb.Type t : parents) {
+      TypeRef parent = (TypeRef) t;
+      SymbolInformation pinfo = index.infos.get(parent.symbol());
+      if (pinfo.kind().isClass()) {
+        return new ClassSymbol(pinfo.symbol());
+      }
+    }
+
     return ClassSymbol.OBJECT;
   }
 
   @Override
   public ImmutableList<ClassSymbol> interfaces() {
-    return ImmutableList.of();
+    List<ClassSymbol> res = new ArrayList<>();
+    ClassSignature sig = ((ClassSignature) info.signature());
+
+    Collection<scala.meta.internal.semanticdb.Type> parents =
+        JavaConverters.asJavaCollection(sig.parents());
+
+    for (scala.meta.internal.semanticdb.Type t : parents) {
+      TypeRef parent = (TypeRef) t;
+      SymbolInformation pinfo = index.infos.get(parent.symbol());
+      if (pinfo.kind().isTrait() || pinfo.kind().isInterface()) {
+        res.add(new ClassSymbol(pinfo.symbol()));
+      }
+    }
+
+    return res.stream().collect(ImmutableList.toImmutableList());
   }
 
   @Override
@@ -113,9 +153,9 @@ public class RscBoundClass implements BytecodeBoundClassProvider {
   @Override
   public AnnotationMetadata annotationMetadata() {
     return new AnnotationMetadata(
-      RetentionPolicy.RUNTIME,
-      ImmutableSet.of(),
-      ClassSymbol.OBJECT
+        RetentionPolicy.RUNTIME,
+        ImmutableSet.of(),
+        ClassSymbol.OBJECT
     );
   }
 
@@ -132,17 +172,17 @@ public class RscBoundClass implements BytecodeBoundClassProvider {
   @Override
   public ClassFile classFile() {
     return new ClassFile(
-      1,
-      "name",
-      "signature",
-      "superClass",
-      Collections.emptyList(),
-      Collections.emptyList(),
-      Collections.emptyList(),
-      Collections.emptyList(),
-      Collections.emptyList(),
-      ImmutableList.of(),
-      null);
+        1,
+        info.displayName(),
+        "signature",
+        superclass().simpleName(),
+        Collections.emptyList(),
+        Collections.emptyList(),
+        Collections.emptyList(),
+        Collections.emptyList(),
+        Collections.emptyList(),
+        ImmutableList.of(),
+        null);
   }
 
 }
