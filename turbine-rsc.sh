@@ -1,12 +1,16 @@
+#!/usr/bin/env bash
+
 set -euxo pipefail
 
 # Create semanticdb from Rsc
 # Use semanticdb as input into Turbine
 # Basically, create Java header jars from Scala header jars
 
-mvn package
+mvn -Dmaven.test.skip=true package
 
-echo "class C" > C.scala
+cat > C.scala <<EOF
+class C
+EOF
 cat > D.java <<EOF
 public class D {
   public static C foo() {
